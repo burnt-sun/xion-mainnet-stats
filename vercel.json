@@ -4,11 +4,5 @@
       "path": "/api/fetch-holders",
       "schedule": "*/10 * * * *"
     }
-  ],
-  "functions": {
-    "api/fetch-holders/route.ts": {
-      "runtime": "edge",
-      "schedule": "@every 10m"
-    }
-  }
+  ]
 }
