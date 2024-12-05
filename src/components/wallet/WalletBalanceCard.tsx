@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { WalletBalance } from "@/types/wallet";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
 
 interface WalletBalanceCardProps {
   address: string;
@@ -10,7 +12,9 @@ export const WalletBalanceCard = ({
   address,
   label,
 }: WalletBalanceCardProps) => {
-  const { data, isLoading, error } = useQuery<WalletBalance>({
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { data, isLoading, error, refetch } = useQuery<WalletBalance>({
     queryKey: ["wallet-balance", address],
     queryFn: async () => {
       const response = await fetch(`/api/wallet-balance?address=${address}`);
@@ -20,6 +24,20 @@ export const WalletBalanceCard = ({
     refetchInterval: 5 * 60 * 1000,
     refetchIntervalInBackground: false,
   });
+
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      const response = await fetch(`/api/fetch-wallet?address=${address}`);
+      if (!response.ok) throw new Error("Failed to fetch wallet data");
+
+      await refetch();
+    } catch (error) {
+      console.error("Error refreshing wallet:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   if (error) return <div className="text-red-400">Error loading balance</div>;
   if (isLoading) return <div className="text-gray-400">Loading...</div>;
@@ -33,10 +51,24 @@ export const WalletBalanceCard = ({
       <p className="mt-2 text-gray-200">
         Balance: {balance.toLocaleString()} XION
       </p>
-      <p className="text-xs text-gray-500 mt-1">
-        Last updated:{" "}
-        {data?.created_at ? new Date(data.created_at).toLocaleString() : "N/A"}
-      </p>
+      <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+        <span>
+          Last updated:{" "}
+          {data?.created_at
+            ? new Date(data.created_at).toLocaleString()
+            : "N/A"}
+        </span>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="p-1 hover:bg-gray-700 rounded-full transition-colors disabled:opacity-50"
+          title="Refresh balance"
+        >
+          <ArrowPathIcon
+            className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
+          />
+        </button>
+      </div>
     </div>
   );
 };
