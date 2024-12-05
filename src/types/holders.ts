@@ -1,11 +1,16 @@
-export interface Balance {
-  denom: string;
-  amount: string;
-}
-
 export interface Owner {
   address: string;
-  balance: Balance;
+  balance: string;
+}
+
+export interface HolderSnapshot {
+  timestamp: string;
+  total_holders: string;
+  holders: Owner[];
+}
+
+export interface HoldersData {
+  snapshots: HolderSnapshot[];
 }
 
 export interface PaginatedResponse {

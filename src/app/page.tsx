@@ -1,63 +1,61 @@
 "use client";
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Owner } from "@/types/holders";
+import { WalletBalanceCard } from "@/components/wallet/WalletBalanceCard";
+import { WalletBalanceChart } from "@/components/wallet/WalletBalanceChart";
+import { TotalHoldersCard } from "@/components/holders/TotalHoldersCard";
+import { TotalHoldersChart } from "@/components/holders/TotalHoldersChart";
 
-interface HolderSnapshot {
-  timestamp: string;
-  total_holders: string;
-  holders: Owner[];
-}
-
-interface HoldersData {
-  snapshots: HolderSnapshot[];
-}
+const MONITORED_WALLETS = [
+  {
+    address: "xion1rzh8e2n4p59vdgtcdnjef9rlwp6y950fytheme",
+    label: "Airdrop Wallet",
+  },
+  {
+    address: "xion12q9q752mta5fvwjj2uevqpuku9y60j33j9rll0",
+    label: "Fee Granter",
+  },
+];
 
 const Dashboard = () => {
-  const {
-    data: holdersData,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery<HoldersData>({
-    queryKey: ["holders"],
-    queryFn: async () => {
-      const response = await fetch(`/api/holders?snapshot=true`);
-      if (!response.ok) throw new Error("Failed to fetch holders data");
-      return response.json();
-    },
-  });
-
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Xion Network Dashboard</h1>
+    <div className="p-4 bg-gray-900 min-h-screen">
+      <h1 className="text-2xl font-bold text-gray-100">
+        Xion Network Dashboard
+      </h1>
 
-      <div className="mt-4 flex items-center gap-4">
-        <button
-          onClick={() => refetch()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Refresh
-        </button>
+      {/* Current Balances Section */}
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold text-gray-200 mb-4">
+          Current Balances
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {MONITORED_WALLETS.map((wallet) => (
+            <WalletBalanceCard
+              key={wallet.address}
+              address={wallet.address}
+              label={wallet.label}
+            />
+          ))}
+          <TotalHoldersCard />
+        </div>
       </div>
 
-      <div className="mt-4">
-        {error ? (
-          <p className="text-red-500">Error: {(error as Error).message}</p>
-        ) : isLoading ? (
-          <p>Loading...</p>
-        ) : holdersData?.snapshots ? (
-          <div>
-            <p className="text-xl">
-              Current Holders of Xion: {holdersData.snapshots[0].total_holders}
-            </p>
-            <p className="text-sm text-gray-600">
-              Last updated:{" "}
-              {new Date(holdersData.snapshots[0].timestamp).toLocaleString()}
-            </p>
-          </div>
-        ) : null}
+      {/* Historical Charts Section */}
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold text-gray-200 mb-4">
+          Historical Data
+        </h2>
+        <div className="grid grid-cols-1 gap-4">
+          <TotalHoldersChart />
+          {MONITORED_WALLETS.map((wallet) => (
+            <WalletBalanceChart
+              key={`chart-${wallet.address}`}
+              address={wallet.address}
+              label={wallet.label}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
