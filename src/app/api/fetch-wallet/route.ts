@@ -14,7 +14,6 @@ interface UxionBalance {
 
 export async function GET(request: Request) {
   try {
-    // Get the wallet address from the URL
     const { searchParams } = new URL(request.url);
     const address = searchParams.get("address");
 

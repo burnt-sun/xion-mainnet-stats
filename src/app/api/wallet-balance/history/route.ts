@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       .select("*")
       .eq("address", address)
       .order("created_at", { ascending: false })
-      .limit(100); // Adjust limit as needed
+      .limit(100);
 
     if (error) throw error;
 
