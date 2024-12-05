@@ -47,7 +47,6 @@ const Dashboard = () => {
           Historical Data
         </h2>
         <div className="grid grid-cols-1 gap-4">
-          <TotalHoldersChart />
           {MONITORED_WALLETS.map((wallet) => (
             <WalletBalanceChart
               key={`chart-${wallet.address}`}
@@ -55,6 +54,7 @@ const Dashboard = () => {
               label={wallet.label}
             />
           ))}
+          <TotalHoldersChart />
         </div>
       </div>
     </div>
