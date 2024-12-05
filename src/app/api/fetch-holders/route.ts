@@ -6,26 +6,17 @@ import { Owner, PaginatedResponse } from "@/types/holders";
 const API_ENDPOINT =
   "https://api.xion-mainnet-1.burnt.com/cosmos/bank/v1beta1/denom_owners/uxion";
 
-const fetchAllOwners = async (): Promise<Owner[]> => {
-  let allOwners: Owner[] = [];
-  let nextKey: string | null = null;
+const fetchAllOwners = async (): Promise<{
+  denom_owners: Owner[];
+  pagination: {
+    next_key: string | null;
+    total: string;
+  };
+}> => {
+  const response: { data: PaginatedResponse } = await axios.get(API_ENDPOINT);
 
-  while (true) {
-    const response: { data: PaginatedResponse } = await axios.get(
-      API_ENDPOINT,
-      {
-        params: nextKey ? { "pagination.key": nextKey } : {},
-      }
-    );
-
-    const { denom_owners, pagination } = response.data;
-    allOwners = [...allOwners, ...denom_owners];
-
-    if (!pagination?.next_key) break;
-    nextKey = pagination.next_key;
-  }
-
-  return allOwners;
+  const { denom_owners, pagination } = response.data;
+  return { denom_owners, pagination };
 };
 
 export async function GET() {
@@ -33,15 +24,15 @@ export async function GET() {
     const owners = await fetchAllOwners();
 
     const { error } = await supabase.from("Xion Holders").insert({
-      total_holders: owners.length.toString(),
-      data: owners,
+      total_holders: owners.pagination.total,
+      data: owners.denom_owners,
     });
 
     if (error) throw error;
 
     return NextResponse.json({
       success: true,
-      total: owners.length,
+      total: owners.pagination.total,
       message: "Data successfully stored in Supabase",
     });
   } catch (error) {
