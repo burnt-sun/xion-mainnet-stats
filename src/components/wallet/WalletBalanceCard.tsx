@@ -17,6 +17,8 @@ export const WalletBalanceCard = ({
       if (!response.ok) throw new Error("Failed to fetch wallet data");
       return response.json();
     },
+    refetchInterval: 5 * 60 * 1000,
+    refetchIntervalInBackground: false,
   });
 
   if (error) return <div className="text-red-400">Error loading balance</div>;
