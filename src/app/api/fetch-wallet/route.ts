@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
-import supabase from "../../../utils/supabase";
+import supabase from "../../../lib/supabase";
 
 const BASE_API_URL =
   "https://api.xion-mainnet-1.burnt.com/cosmos/bank/v1beta1/balances/";

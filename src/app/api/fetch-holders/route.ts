@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
-import supabase from "../../../utils/supabase";
+import supabase from "../../../lib/supabase";
 import { Owner, PaginatedResponse } from "@/types/holders";
 
 const API_ENDPOINT =

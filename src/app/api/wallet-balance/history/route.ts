@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import supabase from "../../../../utils/supabase";
+import supabase from "../../../../lib/supabase";
 import { TimeInterval } from "@/components/charts/TimeSeriesChart";
 
 export async function GET(request: Request) {
