@@ -1,19 +1,37 @@
 import { NextResponse } from "next/server";
 import supabase from "../../../utils/supabase";
+import { TimeInterval } from "@/components/charts/TimeSeriesChart";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const snapshot = searchParams.get("snapshot") === "true";
+  const interval = (searchParams.get("interval") || "24h") as TimeInterval;
 
   try {
-    let query = supabase
+    const now = new Date();
+    let startTime: Date;
+
+    switch (interval) {
+      case "1h":
+        startTime = new Date(now.getTime() - 60 * 60 * 1000);
+        break;
+      case "24h":
+        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case "7d":
+        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "all":
+        startTime = new Date(0);
+        break;
+      default:
+        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    }
+
+    const query = supabase
       .from("Xion Holders")
       .select("total_holders, updated_at")
-      .order("updated_at", { ascending: false });
-
-    if (!snapshot) {
-      query = query.limit(1);
-    }
+      .gte("updated_at", startTime.toISOString())
+      .order("updated_at", { ascending: true });
 
     const { data, error } = await query;
 
@@ -26,19 +44,11 @@ export async function GET(request: Request) {
       );
     }
 
-    if (snapshot) {
-      return NextResponse.json({
-        snapshots: data.map((record) => ({
-          timestamp: record.updated_at,
-          total_holders: record.total_holders,
-        })),
-      });
-    }
-
     return NextResponse.json({
-      timestamp: data[0].updated_at,
-      total: data[0].total_holders,
-      next_key: null,
+      snapshots: data.map((record) => ({
+        timestamp: record.updated_at,
+        total_holders: record.total_holders,
+      })),
     });
   } catch (error: unknown) {
     return NextResponse.json(

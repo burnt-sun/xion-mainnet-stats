@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import supabase from "../../../../utils/supabase";
+import { TimeInterval } from "@/components/charts/TimeSeriesChart";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get("address");
+    const interval = (searchParams.get("interval") || "24h") as TimeInterval;
 
     if (!address) {
       return NextResponse.json(
@@ -13,12 +15,32 @@ export async function GET(request: Request) {
       );
     }
 
+    const now = new Date();
+    let startTime: Date;
+
+    switch (interval) {
+      case "1h":
+        startTime = new Date(now.getTime() - 60 * 60 * 1000);
+        break;
+      case "24h":
+        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case "7d":
+        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "all":
+        startTime = new Date(0); // Beginning of time
+        break;
+      default:
+        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    }
+
     const { data, error } = await supabase
       .from("feegrant_balance")
       .select("*")
       .eq("address", address)
-      .order("created_at", { ascending: false })
-      .limit(100);
+      .gte("created_at", startTime.toISOString())
+      .order("created_at", { ascending: true });
 
     if (error) throw error;
 
