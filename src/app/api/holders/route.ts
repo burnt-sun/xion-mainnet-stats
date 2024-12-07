@@ -23,6 +23,9 @@ export async function GET(request: Request) {
       case "all":
         startTime = new Date(0);
         break;
+      case "current":
+        startTime = new Date(now.getTime() - 60 * 20 * 1000);
+        break;
       default:
         startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     }
@@ -36,6 +39,8 @@ export async function GET(request: Request) {
     const { data, error } = await query;
 
     if (error) throw error;
+
+    console.log(`Holders data for interval ${interval}:`, data);
 
     if (!data || data.length === 0) {
       return NextResponse.json(

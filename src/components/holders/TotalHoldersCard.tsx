@@ -12,9 +12,11 @@ export const TotalHoldersCard = () => {
     error,
     refetch,
   } = useQuery<HoldersData>({
-    queryKey: ["holders"],
+    queryKey: ["holders", "current"],
     queryFn: async () => {
-      const response = await fetch(`/api/holders?snapshot=true`);
+      const response = await fetch(
+        `/api/holders?snapshot=true&interval=current`
+      );
       if (!response.ok) throw new Error("Failed to fetch holders data");
       return response.json();
     },

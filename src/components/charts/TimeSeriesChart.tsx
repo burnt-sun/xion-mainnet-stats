@@ -7,7 +7,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export type TimeInterval = "1h" | "24h" | "7d" | "all";
+export type TimeInterval = "1h" | "24h" | "7d" | "all" | "current";
 
 interface TimeSeriesData {
   timestamp: string;
