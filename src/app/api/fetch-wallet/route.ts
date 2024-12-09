@@ -16,6 +16,8 @@ interface UxionBalance {
 }
 
 export async function GET(request: Request) {
+  let responseMessage = "Wallet data successfully stored in Supabase";
+
   try {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get("address");
@@ -44,7 +46,10 @@ export async function GET(request: Request) {
 
     const balance_int = parseInt(balance);
 
-    if (balance_int > balance_threshold) {
+    if (balance_int < balance_threshold) {
+      responseMessage += `- ⚠️ Wallet balance is low: ${address} has a balance of ${
+        balance_int / 1_000_000
+      } uxion`;
       await notifySubscribers(
         `⚠️ Wallet balance is low: ${address} has a balance of ${
           balance_int / 1_000_000
@@ -56,7 +61,7 @@ export async function GET(request: Request) {
       success: true,
       address: address,
       balance: balance,
-      message: "Wallet data successfully stored in Supabase",
+      message: responseMessage,
     });
   } catch (error) {
     console.error("Error:", error);
